@@ -13,8 +13,23 @@
     <script src="/socket.io/socket.io.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
 	<script>
-
+        $('#logout').on('click', function() {
+          window.location.href = '/logout';
+        });
+        $('#home').on('click', function() {
+          window.location.href = '/';
+        });
+        $('#about').on('click', function() {
+          window.location.href = '/about';
+        });
 	</script>
+    {{#if sess_user}}
+        <script>
+            $('#profile').on('click', function() {
+              window.location.href = '/user/{{sess_user}}';
+            });
+        </script>
+    {{/if}}
 </body>
 </html>
 

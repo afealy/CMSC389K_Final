@@ -18,6 +18,14 @@
       <br>
   </div>
   <br>
+  <div>
+      <center><button type="button" id="visitUser">Go to seller page</button></center>
+  </div>
+  <script>
+    $('#visitUser').on('click', function() {
+      window.location.href = '/user/{{product.poster}}';
+    });
+  </script>
 </article>
   <center><u><h1>{{product.name}} reviews</h1> </u></center>
   <br></br>

@@ -1,0 +1,20 @@
+<h1>Login</h1>
+<article>
+    <form method="POST" action="/login">
+        <div class="input-field">
+            <label>Username:</label>
+            <input type="text" name="username" size="30" placeholder="Username">
+        </div>
+        <div class="input-field">
+            <label>Password:</label>
+            <input type="password" name="password" size="30" placeholder="Password">
+        </div>
+        <button type="submit">Login</button><button type="button" id="register">Register</button>
+    </form>
+</article>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+<script>
+    $('#register').on('click', function() {
+      window.location.href = '/register';
+    });
+</script>

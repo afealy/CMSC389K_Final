@@ -5,6 +5,7 @@ var logger = require('morgan');
 var mongoose = require('mongoose');
 var dotenv = require('dotenv');
 var dataUtil = require("./data-util");
+var userUtil = require("./user-util");
 var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
@@ -34,14 +35,15 @@ dotenv.load();
 
 // Connect to MongoDB
 console.log(process.env.MONGODB)
-mongoose.connect(process.env.MONGODB, {
+var conn = mongoose.connect(process.env.MONGODB, {
     useMongoClient: true
 });
 mongoose.connection.on('error', function() {
     console.log('MongoDB Connection Error. Please make sure that MongoDB is running.');
     process.exit(1);
 });
-var db = mongoose.connection;
+
+var db = conn;
 
 app.use(cookieParser());
 app.use(session({
@@ -51,25 +53,106 @@ app.use(session({
     store: new MongoStore({ mongooseConnection: db })
 }));
 
-/* Add whatever endpoints you need! Remember that your API endpoints must
- * have '/api' prepended to them. Please remember that you need at least 5
- * endpoints for the API, and 5 others.
- */
+var sess;
 
 app.get('/',function(req,res){
-	var tags = dataUtil.getAllTags();
-    console.log(tags);
-    Product.Product.find({}, function(err, products) {
-        if (err) throw err;
-        res.render('home', {
-            data: products,
-            tags: tags
+    var body = req.body;
+    sess = req.session;
+    if(sess.username) {
+    	var tags = dataUtil.getAllTags();
+        Product.Product.find({}, function(err, products) {
+            if (err) throw err;
+            res.render('home', {
+                sess_user: sess.username,
+                data: products,
+                tags: tags
+            });
         });
+    } else {
+        res.redirect("/login");
+    }
+})
+
+app.get('/login', function(req,res) {
+    res.render('loginForm');
+})
+
+app.post('/login', function(req,res) {
+    sess = req.session;
+    var body = req.body;
+    User.User.findOne({ username: body.username, password: body.password }, function(err, name) {
+        if (!name) { return res.redirect("/register"); }
+        sess.username = name.username;
+        res.redirect("/");
     });
+})
+
+app.get('/logout', function(req,res) {
+    req.session.destroy((err) => {
+        if(err) {
+            return console.log(err);
+        }
+        res.redirect('/');
+    });
+})
+
+app.get('/register', function(req,res) {
+    res.render('registerForm');
+})
+
+app.post('/register', function(req,res) {
+    var body = req.body;
+    sess = req.session;
+    if(verifyRegistration(body.password,body.confirm_password)) {
+        User.User.findOne({ username: body.username }, function(err, name) {
+        if (err) throw err;
+        if (!name) {
+            var user = new User.User({
+                username: body.username,
+                contact: body.contact,
+                password: body.password
+            });
+
+            // Save user to database
+            user.save(function(err) {
+                if (err) throw err;
+                res.redirect("/");
+            });
+        }
+    });
+    }
+})
+
+app.get('/user/:name', function(req,res) {
+    sess = req.session;
+    User.User.findOne({ username: req.params.name }, function(err, user) {
+        if (err) throw err;
+        if (!user) {
+            return res.send('No user found.')
+        }
+        res.render('profile', {
+            sess_user: sess.username,
+            user: user
+        })
+    })
+    
+})
+
+app.delete('/user/:name/delete', function(req,res) {
+    User.User.findOne({ username: req.params.name }, function(err, user) {
+        User.User.findByIdAndRemove(user._id, function(err, user2) {
+            if (err) throw err;
+            if (!user) {
+                return res.send('No user found.')
+            }
+            res.redirect('/');
+        })
+    })
 })
 
 // GET all products endpoint
 app.get("/products", function(req, res) {
+    sess = req.session;
     // Get all products
     Product.Product.find({}, function(err, products) {
         if (err) throw err;
@@ -79,6 +162,7 @@ app.get("/products", function(req, res) {
 
 // POST product endpoint
 app.post('/products', function(req, res) {
+    sess = req.session;
     var body = req.body;
     body.tags = body.tags.split(" ");
 
@@ -89,7 +173,8 @@ app.post('/products', function(req, res) {
         condition: body.condition,
         description: body.description,
         tags: [],
-        reviews: []
+        reviews: [],
+        poster: sess.username
     });
 
     product.tags = product.tags.concat(body.tags);
@@ -102,27 +187,42 @@ app.post('/products', function(req, res) {
 });
 
 app.get('/products/:id', function(req, res) {
+    sess = req.session;
     Product.Product.findOne({ _id: req.params.id }, function(err, product) {
         if (err) throw err;
         if (!product) return res.send('No product found with that ID.');
         res.render('product', {
+            sess_user: sess.username,
             product: product,
             review: product.reviews
         })
     });
 });
 
+app.get('/products/:id/delete', function(req, res) {
+    Product.Product.findByIdAndRemove(req.params.id, function(err, product) {
+        if (err) throw err;
+        if (!product) {
+            return res.send('No product found with given ID.')
+        }
+        res.send('Product deleted!');
+    })
+});
+
 app.get("/products/:id/reviewForm", function(req, res) {
+    sess = req.session;
     Product.Product.findOne({ _id: req.params.id }, function(err, product) {
         if (err) throw err;
         if (!product) return res.send('No product found with that ID.');
         res.render('reviewForm', {
+            sess_user: sess.username,
             product: product
         })
     });
 });
 
 app.post('/products/:id/postReview', function(req, res) {
+    sess = req.session;
     // Add a review
     Product.Product.findOne({ _id: req.params.id }, function(err, product) {
         if (err) throw err;
@@ -131,7 +231,7 @@ app.post('/products/:id/postReview', function(req, res) {
             title: req.body.title,
             comment: req.body.comment,
             rating: parseFloat(req.body.rating),
-            author: req.body.author
+            author: sess.username
         });
 
         // Save review
@@ -143,14 +243,17 @@ app.post('/products/:id/postReview', function(req, res) {
 });
 
 app.get("/productForm", function(req, res) {
+    sess = req.session;
     res.render('productForm');
 });
 
 app.get("/reviewForm", function(req, res) {
+    sess = req.session;
     res.render('reviewForm');
 });
 
 app.get('/tag/:tag', function(req, res) {
+    sess = req.session;
     var tags = dataUtil.getAllTags();
     var tag = req.params.tag;
     var posts = [];
@@ -164,6 +267,7 @@ app.get('/tag/:tag', function(req, res) {
         });
         console.log(posts);
         res.render('home', {
+            sess_user: sess.username,
             tag: tag,
             data: posts,
             tags: tags
@@ -171,9 +275,12 @@ app.get('/tag/:tag', function(req, res) {
     });
 });
 
-// Search endpoint
-app.get('/search',function(req,res){
-	
+
+app.get('/about',function(req,res){
+    sess = req.session;
+	res.render('about', {
+        sess_user: sess.username
+    });
 });
 
 http.listen(portNum, function() {

@@ -42,7 +42,11 @@ var productSchema = new mongoose.Schema({
 	tags: {
 		type: [String]
 	},
-	reviews: [reviewSchema]
+	reviews: [reviewSchema],
+	poster: {
+		type: String,
+		required: true
+	}
 });
 
 var Product = mongoose.model('Product', productSchema);

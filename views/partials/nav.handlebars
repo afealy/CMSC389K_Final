@@ -1,6 +1,12 @@
 <div class="nav">
-    <u><center><h1>Yard Sale</h1></center></u>
+<script>
     
+</script>
+    <u><center><h1>Yard Sale</h1></center></u>
+    {{#if sess_user}}
+    <center><button type="button" id="home">Home</button><button type="button" id="profile">Profile</button><button type="button" id="about">About</button></center>
+    <object align="right">{{sess_user}}   <button type="button" id="logout">Logout</button></object>
+    {{/if}}
     {{#if tags}}
     <center><p> Click on any of the tags below to explore different categories </p></center>
     <div class="tags">
