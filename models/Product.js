@@ -1,14 +1,18 @@
 var mongoose = require('mongoose');
 
 var reviewSchema = new mongoose.Schema({
+	title: {
+		type: String,
+		required: true
+	},
+	comment: {
+		type: String
+	},
 	rating: {
 		type: Number,
 		min: 0.0,
 		max: 5.0,
 		required: true
-	},
-	comment: {
-		type: String
 	},
 	author: {
 		type: String,

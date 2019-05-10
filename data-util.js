@@ -35,7 +35,8 @@ function getAllTags() {
 function getAllProducts() {
     Product.Product.find({}, function(err, products) {
         if (err) throw err;
-        return products
+        console.log(products);
+        return products;
     });
 }
 

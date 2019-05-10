@@ -43,11 +43,13 @@ mongoose.connection.on('error', function() {
 
 app.get('/',function(req,res){
 	var tags = dataUtil.getAllTags();
-    var products = dataUtil.getAllProducts();
     console.log(tags);
-    res.render('home', {
-        data: products,
-        tags: tags,
+    Product.Product.find({}, function(err, products) {
+        if (err) throw err;
+        res.render('home', {
+            data: products,
+            tags: tags
+        });
     });
 })
 
