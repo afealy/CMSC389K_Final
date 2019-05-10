@@ -123,6 +123,14 @@ app.post('/register', function(req,res) {
     }
 })
 
+app.get('/users', function(req,res) {
+    sess = req.session;
+    User.User.find({}, function(err, users) {
+        if (err) throw err;
+        res.send(users);
+    });
+})
+
 app.get('/user/:name', function(req,res) {
     sess = req.session;
     User.User.findOne({ username: req.params.name }, function(err, user) {
