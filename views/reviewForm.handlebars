@@ -1,0 +1,26 @@
+<h1>Post review for {{product}}</h1>
+<article>
+    <form method="POST" action="/brand/{{brand}}/create">
+        <div class="input-field">
+            <label>Title:</label>
+            <input type="text" name="title" size="85" placeholder="Love it">
+        </div>
+        <div class="input-field">
+            <label>Comment:</label>
+            <input type="text" name="comment" size="85" placeholder="I really enjoyed this product because...">
+        </div>
+
+         <div class="input-field">
+            <label>Rating:</label>
+            <input type="number" name="rating" min="1" max="5"  value="10" placeholder="5">
+        </div>
+
+
+        <div class="input-field">
+            <label>Author:</label>
+            <textarea type="text" name="author" size="85" rows="20" placeholder="Katie Beck"></textarea>
+        </div>
+        <button type="submit">Post Review</button>
+    </form>
+</article>
+

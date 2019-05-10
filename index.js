@@ -88,6 +88,11 @@ app.get("/productForm", function(req, res) {
     res.render('productForm');
 });
 
+app.get("/reviewForm", function(req, res) {
+    res.render('reviewForm');
+});
+
+
 
 app.get('/tag/:tag', function(req, res) {
     
