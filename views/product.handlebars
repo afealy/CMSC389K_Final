@@ -1,16 +1,26 @@
 {{#if product}}
-<center><button type="button" id="createNew">Add a review</button></center>
+<center><button type="button" id="postReview">Add a review</button></center>
 <hr>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.js"></script>
   <script>
-    $('#createNew').on('click', function() {
-      window.location.href = '/product/{{product}}/create';
+    $('#postReview').on('click', function() {
+      window.location.href = '/products/{{product.id}}/reviewForm';
     });
   </script>
-  <center><u><h1>{{product}} reviews</h1> </u></center>
+  <article>
+  <center><h2 class="title">{{product.name}}</h2> </center>
+  <br>
+  
+  <div class="content">
+      <center><strong>Condition: {{product.condition}}</strong><br><i>Price: ${{product.price}}</i></center>
+      <hr>
+      <center><u><h2 class="title">{{product.description}}</h2></u></center> <br></br>
+      <br>
+  </div>
+  <br>
+</article>
+  <center><u><h1>{{product.name}} reviews</h1> </u></center>
   <br></br>
-
-
 
 {{else}}
 <center></center><h2>Reviews:</h2> </center>
@@ -20,15 +30,12 @@
 <article>
 	<center><h2 class="title">{{this.title}}</h2> </center> 
   <br></br>
-  <center><strong>Score: {{this.rating}} / 10</strong> </center>
+  <center><strong>Score: {{this.rating}} / 5</strong> </center>
 	<br></br>
 	<div class="content">
 	    {{this.comment}}
 	</div>
   <br></br>
-  <div>
-      <center>Price: {{this.price}}</center>
-  </div>
   <div>
       <center>By: {{this.author}}</center>
   </div>

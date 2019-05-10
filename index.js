@@ -11,8 +11,14 @@ var io = require('socket.io')(http);
 var _ = require("underscore");
 var moment = require('moment');
 
+//Creating session
+var cookieParser = require('cookie-parser');
+var session = require('express-session');
+var MongoStore = require('connect-mongo')(session);
+
 // schemas
 var Product = require('./models/Product');
+var User = require('./models/User');
 
 var portNum = 8000;
 
@@ -35,6 +41,15 @@ mongoose.connection.on('error', function() {
     console.log('MongoDB Connection Error. Please make sure that MongoDB is running.');
     process.exit(1);
 });
+var db = mongoose.connection;
+
+app.use(cookieParser());
+app.use(session({
+    secret: 'my-secret',
+    resave: false,
+    saveUninitialized: true,
+    store: new MongoStore({ mongooseConnection: db })
+}));
 
 /* Add whatever endpoints you need! Remember that your API endpoints must
  * have '/api' prepended to them. Please remember that you need at least 5
@@ -82,8 +97,49 @@ app.post('/products', function(req, res) {
     // Save product to database
     product.save(function(err) {
         if (err) throw err;
-        return res.send('Successfully posted product.');
+        res.redirect("/products/"+product.id);
     });
+});
+
+app.get('/products/:id', function(req, res) {
+    Product.Product.findOne({ _id: req.params.id }, function(err, product) {
+        if (err) throw err;
+        if (!product) return res.send('No product found with that ID.');
+        res.render('product', {
+            product: product,
+            review: product.reviews
+        })
+    });
+});
+
+app.get("/products/:id/reviewForm", function(req, res) {
+    Product.Product.findOne({ _id: req.params.id }, function(err, product) {
+        if (err) throw err;
+        if (!product) return res.send('No product found with that ID.');
+        res.render('reviewForm', {
+            product: product
+        })
+    });
+});
+
+app.post('/products/:id/postReview', function(req, res) {
+    // Add a review
+    Product.Product.findOne({ _id: req.params.id }, function(err, product) {
+        if (err) throw err;
+        if (!product) return res.send('No product found with that ID.');
+        product.reviews = product.reviews.concat({
+            title: req.body.title,
+            comment: req.body.comment,
+            rating: parseFloat(req.body.rating),
+            author: req.body.author
+        });
+
+        // Save review
+        product.save(function(err) {
+            if (err) throw err;
+        });
+    });
+    res.redirect("/products/"+req.params.id);
 });
 
 app.get("/productForm", function(req, res) {
@@ -94,10 +150,25 @@ app.get("/reviewForm", function(req, res) {
     res.render('reviewForm');
 });
 
-
-
 app.get('/tag/:tag', function(req, res) {
-    
+    var tags = dataUtil.getAllTags();
+    var tag = req.params.tag;
+    var posts = [];
+    Product.Product.find({}, function(err, products) {
+        if (err) throw err;
+        products.forEach(function(product) {
+            if (product.tags.indexOf(tag) > -1) {
+                // console.log(product);
+                posts.push(product);
+            }
+        });
+        console.log(posts);
+        res.render('home', {
+            tag: tag,
+            data: posts,
+            tags: tags
+        });
+    });
 });
 
 // Search endpoint

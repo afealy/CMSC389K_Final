@@ -1,13 +1,15 @@
 <center><button type="button" id="postProduct"> Post new product </button></center>
 <hr>
-<h2>Search: <input class="typeahead tt-query" name="typeahead" type="text" /> </h2>
+<!-- <h2>Search: <input class="typeahead tt-query" name="typeahead" type="text" /> </h2> -->
 <br></br>
 
-<br></br>
+<!-- <br></br> -->
 
-<br></br>
-<hr>
-<br></br>
+<!-- <br></br> -->
+<!-- <hr> -->
+<br>
+	
+<!-- </br> -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/typeahead.js/0.11.1/typeahead.bundle.min.js"></script>
   <script>
@@ -31,29 +33,24 @@
 	<br>
 	
 	<div class="content">
-		{{#if this.name}}
+		{{#if this.reviews}}
+
 			<center><p> {{this.name}} </p></center>
 			<hr>
-<!-- 			<u><h2 class="title">{{{this.reviews.[0].title}}}</h2></u> <strong>Score: {{this.reviews.[0].rating}} / 10</strong><br></br>
-			<i>{{{this.reviews.[0].content}}}</i>
-
+			<u><h2 class="title">{{{this.reviews.[0].title}}}</h2></u> <strong>Rating: {{this.reviews.[0].rating}} / 10</strong><br></br>
+			<i>{{{this.reviews.[0].comment}}}</i>
 			<br>
-			
-			<br>
-
-			<u><h2 class="title">{{{this.reviews.[1].title}}}</h2></u> <strong>Score: {{this.reviews.[1].rating}} / 10</strong><br></br>
-			<i>{{{this.reviews.[1].content}}}</i> -->
 
 		{{else}}
-			No reviews for this brand yet :( 
+			No reviews for this Product yet :( 
 		{{/if}}
 	    
 	</div>
 	<br>
 
-<!-- 	<div> 
-		<center> <a href="/brand/{{this.name}}"><button type="button">See more reviews for their products</button></a> </center>
-	</div> -->	
+	<div> 
+		<center> <a href="/products/{{this.id}}"><button type="button">See more reviews for their products</button></a> </center>
+	</div>	
 
 
 	
@@ -61,8 +58,8 @@
 {{else}}
 
 <article>
-    <h1>There are no brands posted yet. :(</h1>
-    <a href="/create">Be the first to post a brand!</a>
+    <h1>There are no products posted yet. :(</h1>
+    <a href="/productForm">Be the first to post a product!</a>
 </article>
 {{/each}}
 <hr>
