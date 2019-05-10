@@ -25,11 +25,11 @@ var _DATA = dataUtil.loadData().restaurants;
 
 app.get('/',function(req,res){
 	var tags = dataUtil.getAllTags(_DATA);
-	var names = dataUtil.getAllNames(_DATA);
+    var brands = dataUtil.getAllBrands(_DATA);
     res.render('home', {
         data: _DATA,
         tags: tags,
-        names: names
+        brands: brands
     });
 })
 

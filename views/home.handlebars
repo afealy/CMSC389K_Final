@@ -1,0 +1,107 @@
+
+<center><button type="button" id="createNew"> Create a new Brand</button></center>
+<hr>
+<h2>Search: <input class="typeahead tt-query" name="typeahead" type="text" /> </h2>
+<br></br>
+
+<br></br>
+
+<br></br>
+<hr>
+<br></br>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/typeahead.js/0.11.1/typeahead.bundle.min.js"></script>
+  <script>
+    $('#createNew').on('click', function() {
+      window.location.href = '/create';
+    });
+    var substringMatcher = function(strs) {
+		return function findMatches(q, cb) {
+		var matches, substringRegex;
+
+		// an array that will be populated with substring matches
+		matches = [];
+
+		// regex used to determine if a string contains the substring `q`
+		substrRegex = new RegExp(q, 'i');
+
+		// iterate through the pool of strings and for any string that
+		// contains the substring `q`, add it to the `matches` array
+		$.each(strs, function(i, str) {
+			if (substrRegex.test(str)) {
+				matches.push(str);
+			}
+		});
+
+		cb(matches);
+		};
+	};
+	var str = '{{brands}}';
+	var arr = str.split(",");
+	$('.typeahead').typeahead({
+		hint: true,
+		highlight: true,
+		minLength: 1
+	},
+	{
+		name: 'brands',
+		source: substringMatcher(arr)
+	});
+	$('.typeahead').on( 'typeahead:selected', function(event, selected_object, dataset) {
+		window.location.href = '/brand/'+selected_object;
+	});
+  </script>
+
+{{#if tag}}
+<h2>{{tag}}:</h2> 
+{{else}}
+<center><p> This website will allow people to read and write reviews about the different product each brand offers. </p></center>
+
+<center><h1>Makeup Brands</h1></center>
+{{/if}}
+
+
+{{#each data}}
+<div class="category"> <center><strong>{{this.category}}</strong></center>
+</div>	
+<article>
+	<center><h2 class="title">{{this.name}}</h2> </center>
+	<br>
+	
+	<div class="content">
+		{{#if this.reviews.[0]}}
+			<center><p> {{this.caption}} </p></center>
+			<hr>
+			<u><h2 class="title">{{{this.reviews.[0].title}}}</h2></u> <strong>Score: {{this.reviews.[0].rating}} / 10</strong><br></br>
+			<i>{{{this.reviews.[0].content}}}</i>
+
+			<br>
+			
+			<br>
+
+			<u><h2 class="title">{{{this.reviews.[1].title}}}</h2></u> <strong>Score: {{this.reviews.[1].rating}} / 10</strong><br></br>
+			<i>{{{this.reviews.[1].content}}}</i>
+
+		{{else}}
+			No reviews for this brand yet :( 
+		{{/if}}
+	    
+	</div>
+	<br>
+
+	<div> 
+		<center> <a href="/brand/{{this.name}}"><button type="button">See more reviews for their products</button></a> </center>
+	</div>	
+
+
+	
+</article>
+{{else}}
+
+<article>
+    <h1>There are no brands posted yet. :(</h1>
+    <a href="/create">Be the first to post a brand!</a>
+</article>
+{{/each}}
+<hr>
+
