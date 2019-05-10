@@ -84,6 +84,11 @@ app.post('/products', function(req, res) {
     });
 });
 
+app.get("/productForm", function(req, res) {
+    res.render('productForm');
+});
+
+
 app.get('/tag/:tag', function(req, res) {
     
 });
