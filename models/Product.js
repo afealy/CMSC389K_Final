@@ -21,18 +21,22 @@ var productSchema = new mongoose.Schema({
 		type: String,
 		required: true
 	},
+	price: {
+		type: Number,
+		min: 0.0,
+		max: 10000.0,
+		required: true
+	},
+	condition: {
+		type: String,
+		required: true
+	},
+	description: {
+		type: String,
+		required: true
+	},
 	tags: {
 		type: [String]
-	},
-	condition:
-	{
-		type: String,
-		required: true
-	},
-	description:
-	{
-		type: String,
-		required: true
 	},
 	reviews: [reviewSchema]
 });

@@ -1,0 +1,13 @@
+<div class="nav">
+    <u><center><h1>Come up with name</h1></center></u>
+    <center><p> Click on any of the tags below to explore different categories </p></center>
+    {{#if tags}}
+    <div class="tags">
+    	{{#each tags}}
+	        <a href="/tag/{{this}}" class="tag">#{{this}}</a>
+        {{/each}}
+        <br>
+    </div>
+    {{/if}}
+</div>
+<br><hr>

@@ -1,11 +1,18 @@
 var express = require('express');
+var exphbs = require('express-handlebars');
 var bodyParser = require('body-parser');
 var logger = require('morgan');
-var exphbs = require('express-handlebars');
+var mongoose = require('mongoose');
+var dotenv = require('dotenv');
 var dataUtil = require("./data-util");
 var app = express();
+var http = require('http').Server(app);
+var io = require('socket.io')(http);
 var _ = require("underscore");
 var moment = require('moment');
+
+// schemas
+var Product = require('./models/Product');
 
 var portNum = 8000;
 
@@ -16,102 +23,76 @@ app.engine('handlebars', exphbs({ defaultLayout: 'main' }));
 app.set('view engine', 'handlebars');
 app.use('/public', express.static('public'));
 
+// Load envirorment variables
+dotenv.load();
+
+// Connect to MongoDB
+console.log(process.env.MONGODB)
+mongoose.connect(process.env.MONGODB, {
+    useMongoClient: true
+});
+mongoose.connection.on('error', function() {
+    console.log('MongoDB Connection Error. Please make sure that MongoDB is running.');
+    process.exit(1);
+});
+
 /* Add whatever endpoints you need! Remember that your API endpoints must
  * have '/api' prepended to them. Please remember that you need at least 5
  * endpoints for the API, and 5 others.
  */
 
-var _DATA = dataUtil.loadData().restaurants;
-
 app.get('/',function(req,res){
-	var tags = dataUtil.getAllTags(_DATA);
-    var brands = dataUtil.getAllBrands(_DATA);
+	var tags = dataUtil.getAllTags();
+    var products = dataUtil.getAllProducts();
+    console.log(tags);
     res.render('home', {
-        data: _DATA,
+        data: products,
         tags: tags,
-        brands: brands
     });
 })
 
-app.get("/create", function(req, res) {
-    res.render('createRestaurant');
-});
-
-app.post('/create', function(req, res) {
-    var body = req.body;
-
-    body.tags = body.tags.split(" ");
-    body.reviews = [];
-    body.rating = "0";
-
-    // Save new blog post
-    _DATA.push(req.body);
-    dataUtil.saveData(_DATA);
-    res.redirect("/");
-});
-
-app.get("/restaurant/:name/create", function(req, res) {
-    res.render('create', {
-    	restaurant: req.params.name
+// GET all products endpoint
+app.get("/products", function(req, res) {
+    // Get all products
+    Product.Product.find({}, function(err, products) {
+        if (err) throw err;
+        res.send(products);
     });
 });
 
-app.post('/restaurant/:name/create', function(req, res) {
-	var _rest = req.params.name;
-    var restIndex =  _.findWhere(_DATA, { name: _rest });
+// POST product endpoint
+app.post('/products', function(req, res) {
     var body = req.body;
+    body.tags = body.tags.split(" ");
 
-    var _DATA_REST = restIndex.reviews;
-    // Add time and preview
-    body.time = moment().format('MMMM Do YYYY, h:mm a');
+    // post new product
+    var product = new Product.Product({
+        name: body.name,
+        price: body.price,
+        condition: body.condition,
+        description: body.description,
+        tags: [],
+        reviews: []
+    });
 
-    // Save new blog post
-    _DATA_REST.push(req.body);
-    dataUtil.saveData(_DATA);
-    res.redirect("/restaurant/"+_rest);
-});
+    product.tags = product.tags.concat(body.tags);
 
-app.get('/restaurant/:name', function(req, res) {
-    var _rest = req.params.name;
-    var _reviews = req;
-    console.log(_rest);
-    console.log(_reviews);
-    
-    var restaurant = _.findWhere(_DATA, { name: _rest });
-    console.log(restaurant);
-    if (!restaurant) return res.render('404');
-    res.render('restaurant', {
-    	restaurant: _rest,
-    	review: restaurant.reviews
+    // Save product to database
+    product.save(function(err) {
+        if (err) throw err;
+        return res.send('Successfully posted product.');
     });
 });
 
 app.get('/tag/:tag', function(req, res) {
-    var tags = dataUtil.getAllTags(_DATA);
-    var tag = req.params.tag;
-    var posts = [];
-    _DATA.forEach(function(post) {
-        if (post.tags.includes(tag)) {
-            posts.push(post);
-        }
-    });
-    res.render('home', {
-        tag: tag,
-        data: posts,
-        tags: tags
-    });
+    
 });
 
+// Search endpoint
 app.get('/search',function(req,res){
-	var key = req.query.key;
-	var matches = _.where(_DATA, {name: key})
-	var data=[];
-	for(i=0;i<matches.length;i++) {
-		data.push(rows[i].first_name);
-	}
-	res.end(JSON.stringify(data));
+	
 });
 
-app.listen(portNum, function() {
+http.listen(portNum, function() {
     console.log('Listening on port '+portNum);
 });
