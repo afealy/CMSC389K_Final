@@ -1,0 +1,41 @@
+{{#if product}}
+<center><button type="button" id="createNew">Add a review</button></center>
+<hr>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.js"></script>
+  <script>
+    $('#createNew').on('click', function() {
+      window.location.href = '/product/{{product}}/create';
+    });
+  </script>
+  <center><u><h1>{{product}} reviews</h1> </u></center>
+  <br></br>
+
+
+
+{{else}}
+<center></center><h2>Reviews:</h2> </center>
+{{/if}}
+
+{{#each review}}
+<article>
+	<center><h2 class="title">{{this.title}}</h2> </center> 
+  <br></br>
+  <center><strong>Score: {{this.rating}} / 10</strong> </center>
+	<br></br>
+	<div class="content">
+	    {{this.comment}}
+	</div>
+  <br></br>
+  <div>
+      <center>Price: {{this.price}}</center>
+  </div>
+  <div>
+      <center>By: {{this.author}}</center>
+  </div>
+</article>
+{{else}}
+
+<article>
+    <center><h1>No reviews have been posted!</h1></center>
+</article>
+{{/each}}
