@@ -21,6 +21,7 @@
     "mongoose": "^4.9.5",
     "morgan": "^1.8.1",
     "socket.io": "^2.2.0",
+    "start": "^5.1.0",
     "underscore": "^1.8.3"
   },
   "engines": {
